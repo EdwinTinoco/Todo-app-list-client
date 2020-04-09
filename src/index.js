@@ -1,17 +1,73 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+import axios from "axios";
+
 import './index.css';
-import App from './App';
-import * as serviceWorker from './serviceWorker';
+import TodoItem from "./todoItem"
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
-);
+class App extends React.Component {
+  constructor(){
+    super();
 
-// If you want your app to work offline and load faster, you can change
-// unregister() to register() below. Note this comes with some pitfalls.
-// Learn more about service workers: https://bit.ly/CRA-PWA
-serviceWorker.unregister();
+    this.state = {
+      todo: "",
+      todos: []
+    };  
+  }
+
+  renderTodos = () => {
+    return this.state.todos.map(item => {
+      return (
+        <TodoItem key={item.id} item={item} />
+      )
+    })
+  }
+
+  addTodo = (e) => {
+    e.preventDefault();
+    console.log("added todo");
+  }
+
+  handleChange = (e) =>{
+    this.setState({
+      [e.target.name]: e.target.value
+    });
+  }
+
+  componentDidMount(){
+    axios
+      .get("https://ejt-flask-todo-api.herokuapp.com/todos")
+      .then((res) => {
+        this.setState({
+          todos: res.data
+        })
+      })
+      .catch((err) => {
+        console.log(err)
+      });
+  }
+
+  render(){
+    return(
+      <div className="app">
+        <h1>To Do List</h1>
+        <form className="add-todo" onSubmit={this.addTodo}>
+          <input 
+            type="text"
+            placeholder="Add Todo"
+            name="todo"
+            onChange={(e) => this.handleChange(e)}
+            value={this.state.todo}
+          />
+          <button type="submit">Add</button>
+        </form>
+        {this.renderTodos()}
+      </div>
+    )
+  }
+}
+
+
+ReactDOM.render(<App />, document.getElementById('root'));
+
+
