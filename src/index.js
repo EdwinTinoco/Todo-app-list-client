@@ -47,7 +47,7 @@ class App extends React.Component {
           todo: ""
         })
       })
-      .catch(err => console.log("Add todo Error: ", err))
+      .catch(err => console.log("Add  todo Error: ", err))
   }
 
   handleChange = e =>{
