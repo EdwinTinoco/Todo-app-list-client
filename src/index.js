@@ -15,20 +15,42 @@ class App extends React.Component {
     };  
   }
 
+  deleteItem = id => {
+    fetch(`https://ejt-flask-todo-api.herokuapp.com/todo/${id}`, {
+      method: "DELETE"
+    })
+    .then(
+      this.setState({
+        todos: this.state.todos.filter(item => {
+          return item.id !== id;
+        })
+      })
+    )
+  }
+
   renderTodos = () => {
     return this.state.todos.map(item => {
-      return (
-        <TodoItem key={item.id} item={item} />
-      )
+      return <TodoItem key={item.id} item={item} deleteItem={this.deleteItem} />;      
     })
   }
 
-  addTodo = (e) => {
+  addTodo = e => {
     e.preventDefault();
-    console.log("added todo");
+    axios 
+      .post("https://ejt-flask-todo-api.herokuapp.com/todo", {
+        title: this.state.todo,
+        done: false
+      })
+      .then(res => {
+        this.setState({
+          todos: [res.data, ...this.state.todos],
+          todo: ""
+        })
+      })
+      .catch(err => console.log("Add todo Error: ", err))
   }
 
-  handleChange = (e) =>{
+  handleChange = e =>{
     this.setState({
       [e.target.name]: e.target.value
     });
@@ -37,12 +59,12 @@ class App extends React.Component {
   componentDidMount(){
     axios
       .get("https://ejt-flask-todo-api.herokuapp.com/todos")
-      .then((res) => {
+      .then(res => {
         this.setState({
           todos: res.data
         })
       })
-      .catch((err) => {
+      .catch(err => {
         console.log(err)
       });
   }
@@ -56,7 +78,7 @@ class App extends React.Component {
             type="text"
             placeholder="Add Todo"
             name="todo"
-            onChange={(e) => this.handleChange(e)}
+            onChange={e => this.handleChange(e)}
             value={this.state.todo}
           />
           <button type="submit">Add</button>
